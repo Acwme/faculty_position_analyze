@@ -4,7 +4,7 @@ import re
 import csv
 
 
-web = 'https://profiles.stanford.edu/ayfer-ozgur-aydin'
+web = 'https://ee.stanford.edu/people/faculty?sort=1&filter=0&area=9505&page=0&results=64'
 
 
 r = requests.get(web).content

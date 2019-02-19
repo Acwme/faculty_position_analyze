@@ -1,51 +1,26 @@
 import requests
 from bs4 import BeautifulSoup
-import re
 import csv
+import function_parse_faculty_web as ff
+import function_parse_professor_web as fp
 
-def geturl():
+def geturl(index):
 
-    url = 'http://www.eecs.mit.edu/people/faculty-advisors'
+    url = {
+        1:'http://www.eecs.mit.edu/people/faculty-advisors',
+        2:'https://ee.stanford.edu/people/faculty?sort=1&filter=0&area=9505&page=0&results=64'
+    }
 
-    return url
+    return url[index]
 
 
 
-def requesthtml(url):
-
+def request_web(url):
     r = requests.get(url)
-    # print(r.url)         # url
-    return r.content     #return binary data
-
-def parseHTML(html):
-    soup = BeautifulSoup(html, 'html.parser') #使用BeautifulSoup解析这段代码,能够得到一个 BeautifulSoup 的对象,并能按照标准的缩进格式的结构输出
-    people = soup.find_all('div', class_='postcard-left clearfix')
-    file = [['name', 'title', 'website']]
-    for person in people:
-
-        name = person.select('h3 a')[0].text
-        title = person.select('h3 small span')[0].text
-        web = re.findall('<a.+?href=\"(.+?)\".*>Website</a>', str(person.select('div a')))
-        if name and title and web:
-            file.append([name, title, web[0]])
-
-    return file
+    soup = BeautifulSoup(r.content, 'html.parser') #使用BeautifulSoup解析这段代码,能够得到一个 BeautifulSoup 的对象,并能按照标准的缩进格式的结构输出
+    return soup     #return binary data
 
 
-def parseMIT(html):
-    soup = BeautifulSoup(html, 'html.parser')  # 使用BeautifulSoup解析这段代码,能够得到一个 BeautifulSoup 的对象,并能按照标准的缩进格式的结构输出
-    people = soup.select('#block-system-main > div > div > div > div.view-content > div > ul > li')
-    file = [['name', 'title', 'website']]
-    for person in people:
-
-        name = person.select('div.views-field.views-field-title > span > a')
-        if name:
-            name = name[0].text
-            title = person.select('div.views-field.views-field-field-person-title > div.field-content')[0].text
-            web = re.findall('<a.+?href=\"(.+?)\".*</a>', str(person.select('div.views-field.views-field-title > span > a')))[0]
-            file.append([name, title, web])
-
-    return file
 
 def savecsv(filename, list):
     with open(filename, 'w+') as f:
@@ -63,10 +38,27 @@ def get_CV(filename):
 
 
 if __name__ == '__main__':
-    url = geturl()
-    html = requesthtml(url)
-    weblist = parseMIT(html)
-    savecsv('MIT2.csv', weblist)
+    index = 2
+    url = geturl(index)
+    soup = request_web(url)
+    function_faculty = ff.choose_function_faculty(index)
+    professor_list = function_faculty(soup)
+
+    total_list = [['name', 'title', 'professor_web', 'phd', 'msc', 'bsc']]
+    for n in range(1, len(professor_list)):
+        professor_name = professor_list[n][0]
+        professor_title = professor_list[n][1]
+        professor_web = professor_list[n][2]
+
+        prof_soup = request_web(professor_web)
+        function_professor = fp.choose_function_professor(index)
+        professor_education = function_professor(prof_soup)
+        professor_info = professor_list[n]+professor_education
+        # print(professor_info)
+        total_list.append(professor_info)
+    print(total_list)
+
+    # savecsv('MIT2.csv', weblist)
     # CV = get_CV('stanford.csv')
     # for personal_web in CV:
     #     print(personal_web)
