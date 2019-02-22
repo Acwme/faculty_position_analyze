@@ -8,7 +8,11 @@ def geturl(index):
 
     url = {
         1:'http://www.eecs.mit.edu/people/faculty-advisors',
-        2:'https://ee.stanford.edu/people/faculty?sort=1&filter=0&area=9505&page=0&results=64'
+        2:'https://ee.stanford.edu/people/faculty?sort=1&filter=0&area=9505&page=0&results=64',
+        3:'https://www2.eecs.berkeley.edu/Faculty/Lists/list.html?_ga=2.63704108.2049483718.1550803104-822994221.1550803104',
+        # 4:
+        5:'https://www.eecs.umich.edu/eecs/faculty/eecsfaculty.html',
+        6: 'https://www.ece.cmu.edu/directory/faculty.html',
     }
 
     return url[index]
@@ -38,12 +42,12 @@ def get_CV(filename):
 
 
 if __name__ == '__main__':
-    index = 2
+    index = 6
     url = geturl(index)
     soup = request_web(url)
     function_faculty = ff.choose_function_faculty(index)
     professor_list = function_faculty(soup)
-
+    print(professor_list)
     total_list = [['name', 'title', 'professor_web', 'phd', 'msc', 'bsc']]
     for n in range(1, len(professor_list)):
         professor_name = professor_list[n][0]
